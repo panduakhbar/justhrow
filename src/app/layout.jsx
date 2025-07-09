@@ -1,4 +1,5 @@
 import { Geist_Mono, Inter } from "next/font/google";
+import { Navbar } from "./_components/navbar";
 import "./globals.css";
 
 const inter = Inter({
@@ -20,7 +21,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${inter.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        <main className="wrapper flex min-h-screen flex-col tracking-tight">
+          <Navbar />
+          {children}
+        </main>
       </body>
     </html>
   );
