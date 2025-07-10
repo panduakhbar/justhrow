@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
+    "prisma:reset": "prisma migrate reset",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "docker:restart": "docker compose down && docker compose up -d"
