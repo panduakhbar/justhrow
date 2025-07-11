@@ -1,9 +1,11 @@
 "use server";
 
+import { googleOAuth } from "@/lib/auth";
 import { IS_PROD, SESSION_LIFETIME_IN_DAYS } from "@/lib/constant";
 import { verifyPassword } from "@/services/auth";
 import { createSession } from "@/services/session";
 import { createUser, getUserByEmail } from "@/services/user";
+import * as arctic from "arctic";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -136,4 +138,13 @@ export async function registerAction(_, formData) {
   }
 
   redirect("/");
+}
+
+export async function googleLoginAction() {
+  const state = arctic.generateState();
+  const codeVerifier = arctic.generateCodeVerifier();
+  const scopes = ["openid", "profile", "email"];
+  const url = googleOAuth.createAuthorizationURL(state, codeVerifier, scopes);
+
+  redirect(url.toString());
 }

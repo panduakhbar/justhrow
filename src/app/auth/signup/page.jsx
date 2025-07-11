@@ -2,14 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  IconBrandGithub,
-  IconBrandGoogleFilled,
-  IconLoader2,
-} from "@tabler/icons-react";
+import { IconBrandGithub, IconLoader2 } from "@tabler/icons-react";
 import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
+import { GoogleAuth } from "../_components/google-auth";
 import { registerAction } from "../actions";
 
 const defaultState = {
@@ -49,13 +46,10 @@ export default function SignUpPage() {
   }, [state]);
 
   return (
-    <form
-      action={action}
-      className="mx-auto flex min-h-screen w-full max-w-sm items-center justify-center p-8"
-    >
+    <div className="mx-auto flex min-h-screen w-full max-w-sm items-center justify-center p-8">
       <div className="flex w-full flex-col items-center justify-center gap-4">
         <h1 className="text-2xl font-bold">Create an account</h1>
-        <div className="w-full space-y-2">
+        <form action={action} className="w-full space-y-2">
           <Input
             name="name"
             type="text"
@@ -108,7 +102,7 @@ export default function SignUpPage() {
             {pending && <IconLoader2 className="animate-spin" />}
             Register
           </Button>
-        </div>
+        </form>
         <p className="text-sm">
           <span className="text-muted-foreground">
             Already have an account?{" "}
@@ -118,10 +112,7 @@ export default function SignUpPage() {
           </Link>
         </p>
         <p className="text-muted-foreground text-sm">Or</p>
-        <Button variant="secondary" className="w-full">
-          <IconBrandGoogleFilled />
-          Continue with Google
-        </Button>
+        <GoogleAuth />
         <Button variant="secondary" className="w-full">
           <IconBrandGithub />
           Continue with Github
@@ -130,6 +121,6 @@ export default function SignUpPage() {
           Back to home
         </Link>
       </div>
-    </form>
+    </div>
   );
 }
