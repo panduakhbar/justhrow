@@ -30,10 +30,10 @@ export async function loginAction(_, formData) {
         errors: ["Email and password are required"],
         properties: {
           email: {
-            error: !email ? "Email is required" : "",
+            errors: !email ? ["Email is required"] : [],
           },
           password: {
-            error: !password ? "Password is required" : "",
+            errors: !password ? ["Password is required"] : [],
           },
         },
       },
@@ -91,13 +91,13 @@ export async function registerAction(_, formData) {
         errors: ["Name, email and password are required"],
         properties: {
           name: {
-            error: !name ? "Name is required" : "",
+            errors: !name ? ["Name is required"] : [],
           },
           email: {
-            error: !email ? "Email is required" : "",
+            errors: !email ? ["Email is required"] : [],
           },
           password: {
-            error: !password ? "Password is required" : "",
+            errors: !password ? ["Password is required"] : [],
           },
         },
       },
