@@ -1,7 +1,14 @@
 import { Button } from "@/components/ui/button";
+import { getCurrentSession } from "@/services/session";
 import Link from "next/link";
 
 export async function Workspaces() {
+  const session = await getCurrentSession();
+
+  if (!session || !session.user) {
+    return null;
+  }
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-2">
@@ -11,6 +18,11 @@ export async function Workspaces() {
         </Button>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-4">
+        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
+        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
+        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
+        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
+        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
         <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
       </div>
     </div>
