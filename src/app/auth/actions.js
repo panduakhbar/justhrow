@@ -44,7 +44,7 @@ export async function loginAction(_, formData) {
   }
 
   try {
-    const user = await getUserByEmail({ email, password: true });
+    const user = await getUserByEmail({ email, withPassword: true });
     if (!user) {
       return { error: { errors: ["User not found"] }, state };
     }

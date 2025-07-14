@@ -3,27 +3,16 @@
 import { prisma } from "@/lib/db";
 import { hashPassword } from "./auth";
 
-export async function getUserByEmail(email, withPassword = false) {
-  const user = await prisma.user.findUnique({
+export async function getUserByEmail({ email, includePassword = false }) {
+  return await prisma.user.findUnique({
     where: { email },
     select: {
       id: true,
       name: true,
       email: true,
-      password: withPassword,
+      password: includePassword,
     },
   });
-
-  if (!user) {
-    return null;
-  }
-
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    password: withPassword ? user.password : undefined,
-  };
 }
 
 export async function getUserById({ id }) {

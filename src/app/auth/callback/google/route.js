@@ -1,17 +1,23 @@
-import * as arctic from "arctic";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-import { createSession } from "@/services/auth";
-import { getUserByEmail } from "@/services/user";
+import { NextResponse } from "next/server";
 import { googleOAuth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import {
+  GOOGLE_OAUTH_USER_INFO_URL,
+  IS_PROD,
+  SESSION_LIFETIME_IN_DAYS,
+} from "@/lib/constant";
+import { createSession } from "@/services/session";
+import { createUser, getUserByEmail } from "@/services/user";
 
 export async function GET(request) {
   const cookieStore = await cookies();
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const codeVerifier = cookieStore.get("codeVerifier")?.value;
+
+  if (!code || !codeVerifier) {
+    return NextResponse.redirect(new URL("/auth/login"));
+  }
 
   try {
     const tokens = await googleOAuth.validateAuthorizationCode(
@@ -20,58 +26,42 @@ export async function GET(request) {
     );
     const accessToken = tokens.accessToken();
 
-    const res = await fetch(
-      "https://openidconnect.googleapis.com/v1/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+    const res = await fetch(GOOGLE_OAUTH_USER_INFO_URL, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     const userData = await res.json();
-    const day = 30;
 
-    const existingUser = await getUserByEmail(userData.email);
+    const existingUser = await getUserByEmail({ email: userData.email });
+
     if (existingUser) {
       const newSession = await createSession(existingUser.id);
       cookieStore.set("session", newSession.id, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * day,
+        secure: IS_PROD,
+        maxAge: 60 * 60 * 24 * SESSION_LIFETIME_IN_DAYS,
         path: "/",
       });
     } else {
-      const newUser = await prisma.user.create({
-        data: {
-          name: userData.name,
-          email: userData.email,
-          avatarUrl: userData.picture,
-        },
+      const newUser = await createUser({
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.picture,
       });
 
       const newSession = await createSession(newUser.id);
       cookieStore.set("session", newSession.id, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * day,
+        secure: IS_PROD,
+        maxAge: 60 * 60 * 24 * SESSION_LIFETIME_IN_DAYS,
         path: "/",
       });
     }
   } catch (e) {
-    if (e instanceof arctic.OAuth2RequestError) {
-      const code = e.code;
-      console.log({ code });
-    }
-    if (e instanceof arctic.ArcticFetchError) {
-      const cause = e.cause;
-      console.log({ cause });
-    }
-    console.log({ e });
-    return new Response(
-      "Invalid authorization code, credentials, or redirect URI",
-      { status: 400 },
-    );
+    console.log("[ERROR] Google Callback:", error);
+    return NextResponse.redirect(new URL("/auth/login"));
   }
 
   redirect("/");
