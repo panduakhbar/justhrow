@@ -37,7 +37,7 @@ export async function GET(request) {
     const existingUser = await getUserByEmail({ email: userData.email });
 
     if (existingUser) {
-      const newSession = await createSession(existingUser.id);
+      const newSession = await createSession({userId: existingUser.id});
       cookieStore.set("session", newSession.id, {
         httpOnly: true,
         secure: IS_PROD,
@@ -51,7 +51,7 @@ export async function GET(request) {
         avatarUrl: user.picture,
       });
 
-      const newSession = await createSession(newUser.id);
+      const newSession = await createSession({userId : newUser.id});
       cookieStore.set("session", newSession.id, {
         httpOnly: true,
         secure: IS_PROD,
@@ -66,3 +66,4 @@ export async function GET(request) {
 
   redirect("/");
 }
+

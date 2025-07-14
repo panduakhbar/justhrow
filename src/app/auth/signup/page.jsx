@@ -8,6 +8,7 @@ import React from "react";
 import { toast } from "sonner";
 import { GoogleAuth } from "../_components/google-auth";
 import { registerAction } from "../actions";
+import { GithubAuth } from "../_components/github-auth";
 
 const defaultState = {
   error: {
@@ -113,10 +114,7 @@ export default function SignUpPage() {
         </p>
         <p className="text-muted-foreground text-sm">Or</p>
         <GoogleAuth />
-        <Button variant="secondary" className="w-full">
-          <IconBrandGithub />
-          Continue with Github
-        </Button>
+        <GithubAuth />
         <Link className="text-muted-foreground text-sm" href="/">
           Back to home
         </Link>
