@@ -30,6 +30,7 @@ export async function GET(request) {
     );
 
     const userData = await res.json();
+    const day = 30;
 
     const existingUser = await getUserByEmail(userData.email);
     if (existingUser) {
@@ -37,7 +38,7 @@ export async function GET(request) {
       cookieStore.set("session", newSession.id, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 30,
+        maxAge: 60 * 60 * 24 * day,
         path: "/",
       });
     } else {
@@ -53,7 +54,7 @@ export async function GET(request) {
       cookieStore.set("session", newSession.id, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 30,
+        maxAge: 60 * 60 * 24 * day,
         path: "/",
       });
     }
