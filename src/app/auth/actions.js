@@ -141,10 +141,13 @@ export async function registerAction(_, formData) {
 }
 
 export async function googleLoginAction() {
+  const cookieStore = await cookies();
   const state = arctic.generateState();
   const codeVerifier = arctic.generateCodeVerifier();
   const scopes = ["openid", "profile", "email"];
+
   const url = googleOAuth.createAuthorizationURL(state, codeVerifier, scopes);
 
+  cookieStore.set("codeVerifier", codeVerifier);
   redirect(url.toString());
 }
