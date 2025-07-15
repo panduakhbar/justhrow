@@ -1,6 +1,6 @@
 "use server";
 
-import { googleOAuth } from "@/lib/auth";
+import { googleOAuth, githubOAuth } from "@/lib/auth";
 import { IS_PROD, SESSION_LIFETIME_IN_DAYS } from "@/lib/constant";
 import { verifyPassword } from "@/services/auth";
 import { createSession } from "@/services/session";
@@ -150,4 +150,11 @@ export async function googleLoginAction() {
 
   cookieStore.set("codeVerifier", codeVerifier);
   redirect(url.toString());
+}
+
+export async function githubLoginAction() {
+  const state = arctic.generateState();
+  const scopes = ["read:user", "user:email"];
+  const url = githubOAuth.createAuthorizationURL(state, scopes);
+  redirect(url);
 }
