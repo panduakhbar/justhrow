@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
-
-import { githubLoginAction } from "../actions";
 import { IconBrandGithub } from "@tabler/icons-react";
+import { githubLoginAction } from "../actions";
 
 export function GithubAuth() {
   return (

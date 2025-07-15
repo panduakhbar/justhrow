@@ -1,13 +1,13 @@
 "use server";
 
-import { googleOAuth, githubOAuth } from "@/lib/auth";
+import * as arctic from "arctic";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { githubOAuth, googleOAuth } from "@/lib/auth";
 import { IS_PROD, SESSION_LIFETIME_IN_DAYS } from "@/lib/constant";
 import { verifyPassword } from "@/services/auth";
 import { createSession } from "@/services/session";
 import { createUser, getUserByEmail } from "@/services/user";
-import * as arctic from "arctic";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export async function logoutAction() {
   const cookieStore = await cookies();
@@ -44,7 +44,7 @@ export async function loginAction(_, formData) {
   }
 
   try {
-    const user = await getUserByEmail({ email, withPassword: true });
+    const user = await getUserByEmail({ email, includePassword: true });
     if (!user) {
       return { error: { errors: ["User not found"] }, state };
     }
@@ -54,7 +54,7 @@ export async function loginAction(_, formData) {
       return { error: { errors: ["Invalid password"] }, state };
     }
 
-    const session = await createSession(user.id);
+    const session = await createSession({ userId: user.id });
     cookieStore.set("session", session.id, {
       httpOnly: true,
       secure: IS_PROD,
@@ -121,7 +121,7 @@ export async function registerAction(_, formData) {
 
     const user = await createUser({ name, email, password });
 
-    const session = await createSession(user.id);
+    const session = await createSession({ userId: user.id });
     cookieStore.set("session", session.id, {
       httpOnly: true,
       secure: IS_PROD,
@@ -148,7 +148,7 @@ export async function googleLoginAction() {
 
   const url = googleOAuth.createAuthorizationURL(state, codeVerifier, scopes);
 
-  cookieStore.set("codeVerifier", codeVerifier);
+  cookieStore.set("googleCodeVerifier", codeVerifier);
   redirect(url.toString());
 }
 
@@ -156,5 +156,6 @@ export async function githubLoginAction() {
   const state = arctic.generateState();
   const scopes = ["read:user", "user:email"];
   const url = githubOAuth.createAuthorizationURL(state, scopes);
+
   redirect(url);
 }

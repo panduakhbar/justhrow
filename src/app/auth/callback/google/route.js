@@ -11,12 +11,12 @@ import { createUser, getUserByEmail } from "@/services/user";
 
 export async function GET(request) {
   const cookieStore = await cookies();
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const codeVerifier = cookieStore.get("codeVerifier")?.value;
+
+  const code = request.nextUrl.searchParams.get("code");
+  const codeVerifier = cookieStore.get("googleCodeVerifier")?.value;
 
   if (!code || !codeVerifier) {
-    return NextResponse.redirect(new URL("/auth/login"));
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   try {
@@ -26,19 +26,18 @@ export async function GET(request) {
     );
     const accessToken = tokens.accessToken();
 
-    const res = await fetch(GOOGLE_OAUTH_USER_INFO_URL, {
+    const response = await fetch(GOOGLE_OAUTH_USER_INFO_URL, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    const user = await response.json();
 
-    const userData = await res.json();
-
-    const existingUser = await getUserByEmail({ email: userData.email });
+    const existingUser = await getUserByEmail({ email: user.email });
 
     if (existingUser) {
-      const newSession = await createSession({userId: existingUser.id});
-      cookieStore.set("session", newSession.id, {
+      const session = await createSession({ userId: existingUser.id });
+      cookieStore.set("session", session.id, {
         httpOnly: true,
         secure: IS_PROD,
         maxAge: 60 * 60 * 24 * SESSION_LIFETIME_IN_DAYS,
@@ -51,19 +50,18 @@ export async function GET(request) {
         avatarUrl: user.picture,
       });
 
-      const newSession = await createSession({userId : newUser.id});
-      cookieStore.set("session", newSession.id, {
+      const session = await createSession({ userId: newUser.id });
+      cookieStore.set("session", session.id, {
         httpOnly: true,
         secure: IS_PROD,
         maxAge: 60 * 60 * 24 * SESSION_LIFETIME_IN_DAYS,
         path: "/",
       });
     }
-  } catch (e) {
+
+    return NextResponse.redirect(new URL("/", request.url));
+  } catch (error) {
     console.log("[ERROR] Google Callback:", error);
-    return NextResponse.redirect(new URL("/auth/login"));
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
-
-  redirect("/");
 }
-

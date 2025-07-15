@@ -1,49 +1,45 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { SearchIcon } from "lucide-react";
+import { Workspace } from "@/app/_components/workspace";
+import { getCurrentSession } from "@/services/session";
+import { getAllWorkspace } from "@/services/workspace";
+import { NewWorkspaceForm } from "./_components/new-workspace-form";
+import { SearchFilter } from "./_components/search-filter";
 
-export default async function WorkspacesPage() {
+export default async function WorkspacesPage({ searchParams }) {
+  const query = await searchParams;
+  const sort = query.sort === "asc" ? "asc" : "desc";
+  const search = query.search;
+
+  const session = await getCurrentSession();
+
+  if (!session || !session.user) {
+    return null;
+  }
+
+  const workspaces = await getAllWorkspace({
+    userId: session.user.id,
+    sort,
+    search,
+  });
+
   return (
-    <div className="mx-auto w-full max-w-5xl p-8">
+    <>
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">Your workspaces</h2>
-        <Button className="rounded-full" size="sm">
-          New workspace
-        </Button>
+        <NewWorkspaceForm />
       </div>
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative grow">
-          <SearchIcon className="pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2 text-neutral-400" />
-          <Input
-            placeholder="Search your workspaces"
-            className="my-4 bg-white pl-8 shadow-none"
-          />
-        </div>
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Earliest first" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="asc">Earliest first</SelectItem>
-            <SelectItem value="desc">Latest first</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <SearchFilter />
       <div className="mt-4 grid grid-cols-3 gap-4">
-        {Array.from({ length: 30 }).map((_, index) => (
-          <div
-            key={index}
-            className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50"
-          />
-        ))}
+        {workspaces.map((workspace) => {
+          return (
+            <Workspace
+              key={workspace.id}
+              id={workspace.id}
+              name={workspace.name}
+              filesCount={workspace._count.contents}
+            />
+          );
+        })}
       </div>
-    </div>
+    </>
   );
 }

@@ -2,11 +2,14 @@
 
 import { prisma } from "@/lib/db";
 
-export async function getAllWorkspace({ userId, sort = "desc" }) {
+export async function getAllWorkspace({ userId, sort = "desc", search }) {
+  const where = { userId };
+  if (search && typeof search === "string") {
+    where.name = { contains: search, mode: "insensitive" };
+  }
+
   return await prisma.workspace.findMany({
-    where: {
-      userId,
-    },
+    where,
     include: {
       _count: {
         select: {

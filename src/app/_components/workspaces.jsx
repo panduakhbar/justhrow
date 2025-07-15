@@ -1,11 +1,19 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getCurrentSession } from "@/services/session";
-import Link from "next/link";
+import { getAllWorkspace } from "@/services/workspace";
+import { Workspace } from "./workspace";
 
 export async function Workspaces() {
   const session = await getCurrentSession();
 
   if (!session || !session.user) {
+    return null;
+  }
+
+  const workspaces = await getAllWorkspace({ userId: session.user.id });
+
+  if (!workspaces.length) {
     return null;
   }
 
@@ -18,12 +26,16 @@ export async function Workspaces() {
         </Button>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-4">
-        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
-        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
-        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
-        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
-        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
-        <div className="h-48 w-full animate-pulse rounded-3xl border bg-neutral-50" />
+        {workspaces.map((workspace) => {
+          return (
+            <Workspace
+              key={workspace.id}
+              id={workspace.id}
+              name={workspace.name}
+              filesCount={workspace._count.contents}
+            />
+          );
+        })}
       </div>
     </div>
   );
