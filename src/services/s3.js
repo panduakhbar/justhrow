@@ -31,37 +31,11 @@ export async function uploadMany({ files, folder }) {
   return await Promise.all(files.map((file) => upload({ file, folder })));
 }
 
-export async function getPresignedUrl({ path, contentType, expiresIn = 300 }) {
-  try {
-    const command = new PutObjectCommand({
-      Bucket: CLOUDFLARE_R2_BUCKET,
-      Key: path,
-      ContentType: contentType,
-    });
+export async function getPresignedUrl({ path, expiresIn = 3600 }) {
+  const command = new GetObjectCommand({
+    Bucket: CLOUDFLARE_R2_BUCKET,
+    Key: path,
+  });
 
-    const presignedUrl = await getSignedUrl(r2Client, command, {
-      expiresIn,
-    });
-
-    return presignedUrl;
-  } catch (error) {
-    console.log("[S3] Failed to get Presigned URL: ", error);
-    if (
-      error.name === "CredentialsProviderError" ||
-      error.name === "AccessDenied" ||
-      error.name === "InvalidAccessKeyIdError" ||
-      error.name === "SignatureDoesNotMatchError"
-    ) {
-      throw new Error("Authentication failed with R2 service.");
-    } else if (
-      error.code === "ECONNREFUSED" ||
-      error.code === "ENOTFOUND" ||
-      error.code === "ETIMEDOUT" ||
-      error.name === "NetworkError"
-    ) {
-      throw new Error("Network connection failed.");
-    } else {
-      throw new Error(`Failed to generate presigned URL: ${error.message}`);
-    }
-  }
+  return await getSignedUrl(r2Client, command, { expiresIn });
 }
