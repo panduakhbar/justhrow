@@ -1,4 +1,5 @@
 import { LogOutIcon } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -38,10 +39,12 @@ export async function Navbar() {
           align="end"
           className="min-w-48 font-medium"
         >
-          <DropdownMenuLabel>
-            <p>My Account</p>
-            <p className="text-muted-foreground text-sm">{user?.email}</p>
-          </DropdownMenuLabel>
+          <Link href="/profile">
+            <DropdownMenuLabel className="hover:bg-muted/50 cursor-pointer rounded-md px-2 py-1.5 transition">
+              <p>My Account</p>
+              <p className="text-muted-foreground text-sm">{user?.email}</p>
+            </DropdownMenuLabel>
+          </Link>
           <DropdownMenuSeparator />
           <form action={logoutAction}>
             <DropdownMenuItem

@@ -8,7 +8,8 @@ export const GOOGLE_OAUTH_CLIENT_SECRET =
 export const GOOGLE_OAUTH_CALLBACK_URL =
   process.env.GOOGLE_OAUTH_CALLBACK_URL || "";
 export const GOOGLE_OAUTH_USER_INFO_URL =
-  process.env.GOOGLE_OAUTH_USER_INFO_URL || "";
+  process.env.GOOGLE_OAUTH_USER_INFO_URL ||
+  "https://openidconnect.googleapis.com/v1/userinfo";
 
 export const GITHUB_OAUTH_CLIENT_ID = process.env.GITHUB_OAUTH_CLIENT_ID || "";
 export const GITHUB_OAUTH_CLIENT_SECRET =
