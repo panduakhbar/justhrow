@@ -1,10 +1,14 @@
 import { CLOUDFLARE_R2_BUCKET } from "@/lib/constant";
 import { r2Client } from "@/lib/s3";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createId } from "@paralleldrive/cuid2";
 
-export async function upload({ file, folder }) {
+export async function uploadFile({ file, folder }) {
   const ext = file.name.split(".").at(-1);
   const name = file.name.split(".").slice(0, -1).join(".");
   const filename = `${name}-${createId()}.${ext}`;
@@ -27,15 +31,41 @@ export async function upload({ file, folder }) {
   }
 }
 
-export async function uploadMany({ files, folder }) {
-  return await Promise.all(files.map((file) => upload({ file, folder })));
+export async function uploadManyFile({ files, folder }) {
+  return await Promise.all(files.map((file) => uploadFile({ file, folder })));
 }
 
 export async function getPresignedUrl({ path, expiresIn = 3600 }) {
-  const command = new GetObjectCommand({
-    Bucket: CLOUDFLARE_R2_BUCKET,
-    Key: path,
-  });
+  try {
+    const command = new GetObjectCommand({
+      Bucket: CLOUDFLARE_R2_BUCKET,
+      Key: path,
+    });
 
-  return await getSignedUrl(r2Client, command, { expiresIn });
+    return await getSignedUrl(r2Client, command, { expiresIn });
+  } catch (error) {
+    console.log("[S3] Get presigned URL failed. error: ", error);
+    return "";
+  }
+}
+
+export async function removeFile({ path }) {
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: CLOUDFLARE_R2_BUCKET,
+      Key: path,
+    });
+
+    await r2Client.send(command);
+  } catch (error) {
+    console.log("[S3] Delete failed. error: ", error);
+  }
+}
+
+export async function removeManyFile({ paths }) {
+  try {
+    return await Promise.all(paths.map((path) => removeFile({ path })));
+  } catch (error) {
+    console.log("[S3] Delete failed. error: ", error);
+  }
 }
