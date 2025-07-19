@@ -156,7 +156,7 @@
   }
   100% {
     background-position: 0 94%;
-    -webkit-backdrop-filter: saturate(1.5);
-    backdrop-filter: saturate(1.5);
+    -webkit-backdrop-filter: saturate(3);
+    backdrop-filter: saturate(3);
   }
 }
