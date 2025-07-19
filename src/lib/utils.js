@@ -42,6 +42,7 @@ export function isWithinWeek({ now, later }) {
 }
 
 export function humanizeDate(date) {
+  const adjustedDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
   return new Intl.DateTimeFormat("en-EN", {
     weekday: "long",
     year: "numeric",
@@ -50,5 +51,5 @@ export function humanizeDate(date) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
-  }).format(date);
+  }).format(adjustedDate);
 }
