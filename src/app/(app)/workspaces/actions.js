@@ -5,15 +5,28 @@ import { getCurrentSession } from "@/services/session";
 import { createWorkspace } from "@/services/workspace";
 
 export async function createWorkspaceAction(_, __) {
-  const session = await getCurrentSession();
+  let workspaceId = "";
+  try {
+    const session = await getCurrentSession();
 
-  if (!session?.user) {
+    if (!session?.user) {
+      return {
+        error: {
+          errors: ["You must be logged in to create workspace."],
+        },
+      };
+    }
+
+    const workspace = await createWorkspace({ userId: session.user.id });
+    workspaceId = workspace.id;
+  } catch (error) {
+    console.log("[ERROR] Create Workspace Action:", error);
     return {
-      errors: ["No user found"],
+      error: {
+        errors: ["Failed to create workspace. Please try again."],
+      },
     };
   }
 
-  const workspace = await createWorkspace({ userId: session.user.id });
-
-  redirect(`/workspaces/${workspace.id}`);
+  redirect(`/workspaces/${workspaceId}`);
 }
