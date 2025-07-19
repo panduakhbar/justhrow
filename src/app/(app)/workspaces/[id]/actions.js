@@ -2,8 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import z from "zod";
-import { workspaceSettingsSchema } from "@/lib/schema";
 import { createUTCDate, isWithinWeek } from "@/lib/utils";
 import { createContentMany, deleteContent } from "@/services/content";
 import { uploadManyFile } from "@/services/s3";
@@ -73,17 +71,13 @@ export async function settingsAction(_, form) {
     time,
   };
 
-  const validationResult = workspaceSettingsSchema.safeParse({
-    ...state,
-    date: date ? new Date(date) : undefined,
-  });
-
-  if (!validationResult.success) {
+  if (!name || !date || !time) {
     return {
-      error: z.treeifyError(validationResult.error),
+      error: { errors: ["All fields are required."] },
       state,
     };
   }
+
   try {
     const session = await getCurrentSession();
     if (!session) {
